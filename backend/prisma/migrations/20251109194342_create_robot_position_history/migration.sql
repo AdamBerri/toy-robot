@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE "RobotPositionHistory" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "x" INTEGER NOT NULL,
+    "y" INTEGER NOT NULL,
+    "facing" TEXT NOT NULL,
+    "command" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
