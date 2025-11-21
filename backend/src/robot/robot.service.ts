@@ -9,6 +9,25 @@ type RobotResponse = {
   data: RobotPositionHistory | null;
 };
 
+type RobotHistory = {
+  message: string;
+  data: RobotPositionHistory[] | null;
+};
+
+// Create a button called “Display History” that upon click displays the last ten positions of the robot. For example:
+// PLACE 0, 0, NORTH
+// MOVE
+// MOVE
+// RIGHT
+// MOVE
+// PLACE 4, 4 NORTH
+// LEFT
+// MOVE
+// DISPLAY HISTORY
+
+// Should render in the DOM
+// [0, 0] → [0, 1] → [0, 2] → [1, 2] → [4, 4] → [3, 4]
+
 @Injectable()
 export class RobotService {
   private readonly BOARD_MIN = 0;
@@ -183,6 +202,30 @@ export class RobotService {
     return {
       message: 'Current robot position retrieved',
       data: currentPosition,
+    };
+  }
+
+  async getHistory(max: number): Promise<RobotHistory> {
+    const historyRecord = await this.prisma.robotPositionHistory.findMany({
+      orderBy: { createdAt: 'desc' },
+      where: {
+        command: {
+          notIn: [CommandType.LEFT, CommandType.RIGHT],
+        },
+      },
+      take: max,
+    });
+
+    if (!historyRecord) {
+      return {
+        message: 'No robot placed yet',
+        data: null,
+      };
+    }
+
+    return {
+      message: 'Retrieved the last ' + max,
+      data: historyRecord.reverse(),
     };
   }
 }

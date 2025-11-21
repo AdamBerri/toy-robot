@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { RobotService } from './robot.service';
 import { RobotCommandDto } from './dto/robot.dto';
 
@@ -9,6 +9,18 @@ export class RobotController {
   @Get()
   getRobot() {
     return this.robotService.getRobot();
+  }
+
+  @Get('history')
+  getHistory(@Query('max') max) {
+    const max_history = JSON.parse(max as string);
+    if (typeof max_history !== 'number') {
+      return {
+        message: 'No robot placed yet',
+        data: null,
+      };
+    }
+    return this.robotService.getHistory(max_history);
   }
 
   @Post('command')

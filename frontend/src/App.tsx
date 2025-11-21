@@ -7,11 +7,24 @@ interface RobotPosition {
   y: number;
   facing: string;
 }
+// Create a button called “Display History” that upon click displays the last ten positions of the robot. For example:
+// PLACE 0, 0, NORTH
+// MOVE
+// MOVE
+// RIGHT
+// MOVE
+// PLACE 4, 4 NORTH
+// LEFT
+// MOVE
+// DISPLAY HISTORY
 
+// Should render in the DOM
+// [0, 0] → [0, 1] → [0, 2] → [1, 2] → [4, 4] → [3, 4]
 function App() {
   const [robotPosition, setRobotPosition] = useState<RobotPosition | null>(
     null
   );
+  const [robotHistory, setRobotHistory] = useState<string | null>(null);
   const fetchRobotPosition = async () => {
     try {
       const headers = new Headers();
@@ -83,7 +96,28 @@ function App() {
     await sendCommand("RIGHT");
   }, []);
 
-  const reportRobot = useCallback(() => {
+  const reportRobot = useCallback(async () => {
+    const response = await fetch("http://localhost:3000/robot/history?max=1", {
+      method: "GET",
+    });
+    const history = await response.json();
+    if (!history.data) {
+      console.log("no data was found");
+    }
+    const historyData = history.data;
+    const historyCoords = [];
+
+    for (const record of historyData) {
+      const xCoord = record.x;
+      const yCoord = record.y;
+      const coordinate = `[${xCoord},${yCoord}]`;
+      historyCoords.push(coordinate);
+    }
+
+    const formattedHistory = historyCoords.join(" → ");
+    setRobotHistory(formattedHistory);
+    console.log(historyCoords.join(" → "), "lalalalalalalalalalaalalal");
+
     if (robotPosition) {
       alert(
         `Robot Position:\nX: ${robotPosition.x}\nY: ${robotPosition.y}\nFacing: ${robotPosition.facing}`
@@ -155,6 +189,9 @@ function App() {
           <div className="report">
             <button onClick={reportRobot}>Report</button>
           </div>
+        </div>
+        <div className="history">
+          <p>{robotHistory}</p>
         </div>
       </div>
     </>
